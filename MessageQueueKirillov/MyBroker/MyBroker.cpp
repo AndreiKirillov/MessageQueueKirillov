@@ -4,6 +4,7 @@
 #include "pch.h"
 #include "framework.h"
 #include "MyBroker.h"
+#include "Server.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -14,7 +15,7 @@
 
 CWinApp theApp;
 
-using namespace std;
+std::mutex console_mtx;
 
 int main()
 {
@@ -34,6 +35,29 @@ int main()
         else
         {
             // TODO: вставьте сюда код для приложения.
+            setlocale(LC_ALL, "Russian");
+
+            Server main_server;
+
+            if (!main_server.StartUp())                   // Запускаем сервер
+            {
+                std::cout << "\tServer can not start!" << std::endl;
+                std::cin;
+                return 0;
+            }
+
+            while (true)
+            {
+                std::unique_lock<std::mutex> console_lock(console_mtx);
+                std::cout << ".............Searching new connection............." << std::endl;
+                console_lock.unlock();
+
+                main_server.WaitForConnection();
+
+                console_lock.lock();
+                std::cout << "New client connected to server!" << std::endl
+                    << "Number of clients: " << main_server.GetClientsCount() << std::endl;
+            }
         }
     }
     else

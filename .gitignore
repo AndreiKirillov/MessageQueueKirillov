@@ -39,3 +39,11 @@
 *.vcxproj
 *.filters
 *.user
+MessageQueueKirillov/.vs/MessageQueueKirillov/v16/.suo
+*.recipe
+*.ilk
+*.log
+*.res
+*.tlog
+*.idb
+*.pdb

@@ -27,6 +27,7 @@
 #include <memory>
 #include <mutex>
 #include <chrono>
+#include <future>
 
 #include <vector>
 #include <set>

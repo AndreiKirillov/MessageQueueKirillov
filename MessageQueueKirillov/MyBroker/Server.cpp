@@ -20,7 +20,7 @@ bool Server::StartUp()
         return false;
 }
 
-void Server::ProcessClient(SOCKET hSock)
+void Server::ProcessClient(SOCKET hSock, std::promise<std::string>&& promise_for_id)
 {
     // читаем первое сообщение, из него узнаем никнейм нового клиента
     // добавляем ник в connection
@@ -39,9 +39,9 @@ void Server::WaitForConnection()
         std::cout << "Server error connecting to client!" << std::endl;
         return;
     }
-    CSocket client;
+    CSocket client_sock;
 
-    if (!_server.Accept(client))
+    if (!_server.Accept(client_sock))
     {
         std::lock_guard<std::mutex> console_lock(console_mtx);
         std::cout << "Server error connecting to client!" << std::endl;
@@ -49,12 +49,16 @@ void Server::WaitForConnection()
     }
     else
     {
-        //auto new_connection = std::make_unique<Connection>();                                  // Создаём новое соединение
-        //ProcessClient(client.Detach(), new_connection->GetID());
-        //thread t = thread(&Server::ProcessClient, this, client.Detach(), new_connection->GetID());
-        //t.join();
-        //new_connection->Start(&Server::ProcessClient, this, client.Detach(), new_connection->GetID());    // его обработка запустится в отдельном потоке 
-        //_connections.insert(std::move(new_connection));
+        // создаем промис, в который запишем имя клента, когда узнаем его
+        std::promise<std::string> promise_for_client_id;
+        std::future<std::string> wait_for_promise = promise_for_client_id.get_future();
+
+        // Создаём новое соединение, отправляем туда промис
+        // В конструктор передаем функцию, которая будет обрабатывать взаимодействие с клиентом
+        auto new_connection = std::make_unique<Connection>(&Server::ProcessClient, this, client_sock.Detach(), std::move(promise_for_client_id));
+
+        // получаем обещанный id клиента, добавляем сведения о нём
+        new_connection->setId(wait_for_promise.get());
     }
 }
 

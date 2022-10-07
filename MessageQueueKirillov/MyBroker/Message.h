@@ -22,5 +22,10 @@ private:
 	std::string _data;
 public:
 	Message();
+	Message(const MessageHeader& header, const std::string& data);
+	Message(MessageHeader&& header, std::string&& data);
+
+	static Message read(CSocket& source);
+	static bool send(CSocket& destination, const Message& message);
 };
 

@@ -3,7 +3,7 @@
 
 extern std::mutex console_mtx;
 
-Server::Server():_server()//, _connections(), _working_threads()
+Server::Server():_server(), _connections()
 {
 }
 
@@ -18,6 +18,17 @@ bool Server::StartUp()
         return true;
     else
         return false;
+}
+
+void Server::ProcessClient(SOCKET hSock)
+{
+    // читаем первое сообщение, из него узнаем никнейм нового клиента
+    // добавляем ник в connection
+    // отсылаем подтверждение
+
+    // в бесконечном цикле ждём новое сообщение
+    
+    // полученное сообщение передаем брокеру, он будет разбираться что делать
 }
 
 void Server::WaitForConnection()

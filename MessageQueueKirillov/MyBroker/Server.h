@@ -16,7 +16,7 @@ private:
 	//mutex mtx_for_working_threads;             // синхронизирует доступ к рабочим потокам
 
 
-	void ProcessClient(SOCKET hSock, int client_id);
+	void ProcessClient(SOCKET hSock);
 	void CloseClient(int client_id);
 public:
 	Server();

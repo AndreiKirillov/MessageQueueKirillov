@@ -18,17 +18,46 @@ Message Message::read(CSocket& source)
 	MessageHeader header;
 	source.Receive(&header, sizeof(MessageHeader));
 
-	std::vector<char> v(header.size);
-	source.Receive(&v[0], header.size);
+	if (header.recipient == MessageClient::User)
+	{
+		std::vector<char> recipient(header.recipient_id_size);
+		source.Receive(&recipient[0], header.recipient_id_size);
+		header.recipient_id = std::string(&recipient[0], header.recipient_id_size);
+	}
 
-	return Message(std::move(header), std::string(&v[0], v.size()));
+	if (header.sender == MessageClient::User)
+	{
+		std::vector<char> sender(header.sender_id_size);
+		source.Receive(&sender[0], header.sender_id_size);
+		header.sender_id = std::string(&sender[0], header.sender_id_size);
+	}
+
+	std::vector<char> message(header.size);
+	source.Receive(&message[0], header.size);
+
+	return Message(std::move(header), std::string(&message[0], message.size()));
 }
 
 bool Message::send(CSocket& destination, const Message& message)
 {
+	// отправляем заголовок
 	if (destination.Send(&message._header, sizeof(MessageHeader)) == SOCKET_ERROR)
 		return false;
 
+	if (message._header.recipient == MessageClient::User)
+	{
+		// отправляем имя отправителя
+		if (destination.Send(message._header.recipient_id.c_str(), message._header.recipient_id_size) == SOCKET_ERROR)
+			return false;
+	}
+	if (message._header.sender == MessageClient::User)
+	{
+		// отправляем имя получателя
+		if (destination.Send(message._header.sender_id.c_str(), message._header.sender_id_size) == SOCKET_ERROR)
+			return false;
+	}
+
+	// отправляем само сообщение
 	if (destination.Send(message._data.c_str(), message._data.size()) == SOCKET_ERROR)
 		return false;
 	else

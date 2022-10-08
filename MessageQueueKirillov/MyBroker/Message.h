@@ -4,13 +4,19 @@
 enum class MessageType
 { Init, Exit, Peer2Peer, Request, Empty, Confirm};
 
-enum class Recipient
+enum class MessageClient
 { Broker, User, All};
 
 struct MessageHeader
 {
-	Recipient recipient;
-	std::string sender_id;
+	MessageClient recipient;
+	int recipient_id_size;
+	std::string recipient_id = "";
+
+	MessageClient sender;
+	int sender_id_size;
+	std::string sender_id = "";
+
 	MessageType type;
 	int size;
 };
@@ -19,6 +25,7 @@ class Message
 {
 private:
 	MessageHeader _header;
+
 	std::string _data;
 public:
 	Message();

@@ -58,7 +58,11 @@ void Server::WaitForConnection()
         auto new_connection = std::make_unique<Connection>(&Server::ProcessClient, this, client_sock.Detach(), std::move(promise_for_client_id));
 
         // получаем обещанный id клиента, добавляем сведения о нём
-        new_connection->setId(wait_for_promise.get());
+        std::string client_id = wait_for_promise.get();
+        new_connection->setId(client_id);
+
+        std::lock_guard<std::mutex> console_lock(console_mtx);
+        std::cout << "New client \"" << client_id << "\" connected to the server!" << std::endl;
     }
 }
 

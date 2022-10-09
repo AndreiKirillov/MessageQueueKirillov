@@ -9,13 +9,14 @@ using TimePoint = std::chrono::steady_clock::time_point;
 class Client
 {
 private:
-	std::string _id_nickname;
+	std::string _id;
 	threadsafe_queue<std::shared_ptr<Message>> _message_queue;
 	std::condition_variable _event;
 	CSocket _connection_sock;
 	TimePoint _last_action_time;
 public:
 	Client();
+	Client(const std::string& id);
 
 	void addMessage(const std::shared_ptr<Message>& message);
 

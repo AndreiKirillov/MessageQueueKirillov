@@ -3,7 +3,7 @@
 
 extern std::mutex console_mtx;
 
-Server::Server():_server(), _connections()
+Server::Server():_server(), _connections(), _message_broker()
 {
 }
 
@@ -29,9 +29,11 @@ void Server::ProcessClient(SOCKET hSock, std::promise<std::string>&& promise_for
     Message registration_message = Message::read(client_sock);
     if (MessageHandler::isRegistrationMessage(registration_message))
     {
-        promise_for_id.set_value(registration_message.getSender());  // посылаем имя через promise в ожидающий future объект
+        std::string new_client_id = registration_message.getSender();
+        promise_for_id.set_value(new_client_id);  // посылаем имя через promise в ожидающий future объект
 
-        ////////////  оправить брокеру инфу о новом клиенте ///////////////////////////////////
+        // даём брокеру данные о новом клиенте
+        _message_broker.addClient(new_client_id);
     }
     else   // если клиент не сообщает своё имя, сохраняем исключение в промис
     {

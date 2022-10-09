@@ -1,6 +1,7 @@
 #pragma once
 #include "framework.h"
 #include "Message.h"
+#include "MessageHandler.h"
 //#include "Kirillov_lab1_cpp.h"
 //#include "ThreadStorage.h"
 #include "Connection.h"

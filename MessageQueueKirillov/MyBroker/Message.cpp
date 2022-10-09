@@ -32,10 +32,14 @@ Message Message::read(CSocket& source)
 		header.sender_id = std::string(&sender[0], header.sender_id_size);
 	}
 
-	std::vector<char> message(header.size);
-	source.Receive(&message[0], header.size);
+	if (header.size > 0)
+	{
+		std::vector<char> message(header.size);
+		source.Receive(&message[0], header.size);
+		return Message(std::move(header), std::string(&message[0], message.size()));
+	}
 
-	return Message(std::move(header), std::string(&message[0], message.size()));
+	return Message(std::move(header), std::string());
 }
 
 bool Message::send(CSocket& destination, const Message& message)
@@ -62,4 +66,9 @@ bool Message::send(CSocket& destination, const Message& message)
 		return false;
 	else
 		return true;
+}
+
+std::string Message::getSender() const
+{
+	return _header.sender_id;
 }

@@ -22,8 +22,18 @@ bool Server::StartUp()
 
 void Server::ProcessClient(SOCKET hSock, std::promise<std::string>&& promise_for_id)
 {
+    CSocket client_sock;
+    client_sock.Attach(hSock);
+
     // читаем первое сообщение, из него узнаем никнейм нового клиента
-    // добавляем ник в connection
+    Message registration_message = Message::read(client_sock);
+    if (MessageHandler::isRegistrationMessage(registration_message))
+    {
+        promise_for_id.set_value(registration_message.getSender());  // посылаем имя через promise в ожидающий future объект
+
+        ////////////  оправить брокеру инфу о новом клиенте ///////////////////////////////////
+    }
+
     // отсылаем подтверждение
 
     // в бесконечном цикле ждём новое сообщение

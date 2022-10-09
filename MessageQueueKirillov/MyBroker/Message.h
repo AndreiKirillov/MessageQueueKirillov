@@ -2,7 +2,7 @@
 #include "framework.h"
 
 enum class MessageType
-{ Init, Exit, Peer2Peer, Request, Empty, Confirm};
+{ Registration, Exit, Peer2Peer, Request, Empty, Confirm};
 
 enum class MessageClient
 { Broker, User, All};
@@ -25,7 +25,6 @@ class Message
 {
 private:
 	MessageHeader _header;
-
 	std::string _data;
 public:
 	Message();
@@ -34,5 +33,9 @@ public:
 
 	static Message read(CSocket& source);
 	static bool send(CSocket& destination, const Message& message);
+
+	std::string getSender() const;
+
+	friend class MessageHandler;
 };
 

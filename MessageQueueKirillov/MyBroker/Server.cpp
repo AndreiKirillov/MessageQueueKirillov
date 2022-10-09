@@ -33,6 +33,11 @@ void Server::ProcessClient(SOCKET hSock, std::promise<std::string>&& promise_for
 
         ////////////  оправить брокеру инфу о новом клиенте ///////////////////////////////////
     }
+    else   // если клиент не сообщает своё имя, сохраняем исключение в промис
+    {
+        promise_for_id.set_exception(std::make_exception_ptr(std::runtime_error("Cant registrate new client")));
+        return;
+    }
 
     // отсылаем подтверждение
 
@@ -68,11 +73,19 @@ void Server::WaitForConnection()
         auto new_connection = std::make_unique<Connection>(&Server::ProcessClient, this, client_sock.Detach(), std::move(promise_for_client_id));
 
         // получаем обещанный id клиента, добавляем сведения о нём
-        std::string client_id = wait_for_promise.get();
-        new_connection->setId(client_id);
+        try
+        {
+            std::string client_id = wait_for_promise.get();
+            new_connection->setId(client_id);
 
-        std::lock_guard<std::mutex> console_lock(console_mtx);
-        std::cout << "New client \"" << client_id << "\" connected to the server!" << std::endl;
+            std::lock_guard<std::mutex> console_lock(console_mtx);
+            std::cout << "New client \"" << client_id << "\" connected to the server!" << std::endl;
+        }
+        catch(std::runtime_error& ex)
+        {
+            std::lock_guard<std::mutex> console_lock(console_mtx);
+            std::cout << "Server error! " << ex.what() << std::endl;
+        }
     }
 }
 

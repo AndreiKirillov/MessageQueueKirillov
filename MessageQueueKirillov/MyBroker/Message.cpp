@@ -72,3 +72,11 @@ std::string Message::getSender() const
 {
 	return _header.sender_id;
 }
+
+bool Message::isRegistrationMessage() const
+{
+	bool registration_is_correct = (_header.type == MessageType::Registration);
+	bool message_clients_are_correct = (_header.recipient == MessageClient::Broker && _header.sender == MessageClient::User);
+
+	return registration_is_correct && message_clients_are_correct;
+}

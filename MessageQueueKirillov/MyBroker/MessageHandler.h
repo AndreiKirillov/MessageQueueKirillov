@@ -8,5 +8,7 @@ private:
 	
 public:
 	static bool isRegistrationMessage(const Message& message);
+
+	
 };
 

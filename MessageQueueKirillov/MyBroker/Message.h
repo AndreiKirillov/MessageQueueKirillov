@@ -34,7 +34,12 @@ public:
 	static Message read(CSocket& source);
 	static bool send(CSocket& destination, const Message& message);
 
+	static void sendConfirm(CSocket& destination);
+
+
 	std::string getSender() const;
+
+	bool isRegistrationMessage() const;
 
 	friend class MessageHandler;
 };

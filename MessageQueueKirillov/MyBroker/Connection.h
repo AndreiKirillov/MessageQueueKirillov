@@ -14,7 +14,6 @@ public:
 	template <typename Func, typename ...Args>
 	Connection(Func&& init_function, Args&&... args):_client_id()
 	{
-		std::promise<std::string> promise_for_id;
 		_implementation = std::thread(std::forward<Func>(init_function), std::forward<Args>(args)...);
 	}
 

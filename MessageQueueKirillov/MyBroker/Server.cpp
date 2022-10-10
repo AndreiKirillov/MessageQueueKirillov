@@ -27,7 +27,7 @@ void Server::ProcessClient(SOCKET hSock, std::promise<std::string>&& promise_for
 
     // читаем первое сообщение, из него узнаем никнейм нового клиента
     Message registration_message = Message::read(client_sock);
-    if (MessageHandler::isRegistrationMessage(registration_message))
+    if (registration_message.isRegistrationMessage())
     {
         std::string new_client_id = registration_message.getSender();
         promise_for_id.set_value(new_client_id);  // посылаем имя через promise в ожидающий future объект

@@ -12,14 +12,10 @@ class Server
 private:
 	CSocket _server;
 
-	// коллекция всех подсоединений к серверу
-	std::set<std::unique_ptr<Connection>> _connections;
-
 	// непосредственно брокер сообщений, который будет распределять сообщения от клиентов
 	Broker _message_broker;
 
-	void ProcessClient(SOCKET hSock, std::promise<std::string>&& promise_for_id);
-	void CloseClient(int client_id);
+	void ProcessClient(SOCKET hSock);
 public:
 	Server();
 	~Server();
@@ -27,7 +23,5 @@ public:
 	bool StartUp();
 
 	void WaitForConnection();
-
-	int GetClientsCount();
 };
 

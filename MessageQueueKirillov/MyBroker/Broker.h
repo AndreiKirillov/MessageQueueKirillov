@@ -7,12 +7,14 @@
 class Broker
 {
 private:
-	threadsafe_queue<std::shared_ptr<Message>> _incoming_messages;   // очередь поступаемых на сервер сообщений
-
-	std::map<std::string, Client> _clients;     // набор активных клиентов сервера
+	std::map<std::string, std::unique_ptr<Client>> _clients;     // набор активных клиентов сервера
+	std::mutex _mtx_clients;
 public:
 	Broker();
 
-	void addClient(const std::string& client_id);
+	void addClient(const std::string& id);
+	bool clientExists(const std::string& client_id);
+
+	bool processMessage(const Message& message);
 };
 

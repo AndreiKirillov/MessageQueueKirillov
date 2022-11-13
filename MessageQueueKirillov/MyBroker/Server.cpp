@@ -3,7 +3,7 @@
 
 extern std::mutex console_mtx;
 
-Server::Server():_server(), _connections(), _message_broker()
+Server::Server():_server(), _message_broker()
 {
 }
 
@@ -14,38 +14,37 @@ Server::~Server()
 bool Server::StartUp()
 {
     AfxSocketInit();
+    if (CSocket::FromHandle(_server.m_hSocket) != NULL)
+        std::cout << "SOCKET ATACHED" << std::endl;
+    else
+        std::cout << "SOCKET NOOOT ATACHED" << std::endl;
     if (_server.Create(12345))
+    {
+        if (CSocket::FromHandle(_server.m_hSocket) != NULL)
+            std::cout << "SOCKET ATACHED" << std::endl;
+        else
+            std::cout << "SOCKET NOOOT ATACHED" << std::endl;
         return true;
+    }
     else
         return false;
 }
 
-void Server::ProcessClient(SOCKET hSock, std::promise<std::string>&& promise_for_id)
+void Server::ProcessClient(SOCKET hSock)
 {
     CSocket client_sock;
     client_sock.Attach(hSock);
 
     // читаем первое сообщение, из него узнаем никнейм нового клиента
-    Message registration_message = Message::read(client_sock);
-    if (registration_message.isRegistrationMessage())
+    Message message_from_client = Message::read(client_sock);
+    if (_message_broker.processMessage(message_from_client))   // брокер обрабатывает сообщение
     {
-        std::string new_client_id = registration_message.getSender();
-        promise_for_id.set_value(new_client_id);  // посылаем им€ через promise в ожидающий future объект
-
-        // даЄм брокеру данные о новом клиенте
-        _message_broker.addClient(new_client_id);
+        Message::sendConfirm(client_sock); // если сообщение успешно обработано, посылаем подтверждение
     }
-    else   // если клиент не сообщает своЄ им€, сохран€ем исключение в промис
+    else
     {
-        promise_for_id.set_exception(std::make_exception_ptr(std::runtime_error("Cant registrate new client")));
-        return;
+        Message::sendError(client_sock); // отправл€ем сообщение об ошибке
     }
-
-    // отсылаем подтверждение
-
-    // в бесконечном цикле ждЄм новое сообщение
-    
-    // полученное сообщение передаем брокеру, он будет разбиратьс€ что делать
 }
 
 void Server::WaitForConnection()
@@ -66,32 +65,8 @@ void Server::WaitForConnection()
     }
     else
     {
-        // создаем промис, в который запишем им€ клента, когда узнаем его
-        std::promise<std::string> promise_for_client_id;
-        std::future<std::string> wait_for_promise = promise_for_client_id.get_future();
-
-        // —оздаЄм новое соединение, отправл€ем туда промис
-        // ¬ конструктор передаем функцию, котора€ будет обрабатывать взаимодействие с клиентом
-        auto new_connection = std::make_unique<Connection>(&Server::ProcessClient, this, client_sock.Detach(), std::move(promise_for_client_id));
-
-        // получаем обещанный id клиента, добавл€ем сведени€ о нЄм
-        try
-        {
-            std::string client_id = wait_for_promise.get();
-            new_connection->setId(client_id);
-
-            std::lock_guard<std::mutex> console_lock(console_mtx);
-            std::cout << "New client \"" << client_id << "\" connected to the server!" << std::endl;
-        }
-        catch(std::runtime_error& ex)
-        {
-            std::lock_guard<std::mutex> console_lock(console_mtx);
-            std::cout << "Server error! " << ex.what() << std::endl;
-        }
+        // запускаем обработку клиента в новом потоке
+        std::thread thread_to_process_new_client(&Server::ProcessClient, this, client_sock.Detach());
+        thread_to_process_new_client.detach();
     }
-}
-
-int Server::GetClientsCount()
-{
-    return 0;
 }

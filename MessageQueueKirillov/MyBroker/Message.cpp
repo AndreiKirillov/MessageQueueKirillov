@@ -68,6 +68,19 @@ bool Message::send(CSocket& destination, const Message& message)
 		return true;
 }
 
+void Message::sendConfirm(CSocket& destination)
+{
+}
+
+void Message::sendError(CSocket& destination)
+{
+}
+
+MessageHeader Message::getHeader() const
+{
+	return _header;
+}
+
 std::string Message::getSender() const
 {
 	return _header.sender_id;

@@ -48,15 +48,7 @@ int main()
 
             while (true)
             {
-                std::unique_lock<std::mutex> console_lock(console_mtx);
-                std::cout << ".............Searching new connection............." << std::endl;
-                console_lock.unlock();
-
                 main_server.WaitForConnection();
-
-                console_lock.lock();
-                std::cout << "New client connected to server!" << std::endl
-                    << "Number of clients: " << main_server.GetClientsCount() << std::endl;
             }
         }
     }

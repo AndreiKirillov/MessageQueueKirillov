@@ -40,6 +40,7 @@ public:
 
 	MessageHeader getHeader() const;
 	std::string getSender() const;
+	std::string getRecipient() const;
 
 	bool isRegistrationMessage() const;
 

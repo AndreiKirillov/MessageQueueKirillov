@@ -68,12 +68,18 @@ bool Message::send(CSocket& destination, const Message& message)
 		return true;
 }
 
-void Message::sendConfirm(CSocket& destination)
+void Message::sendConfirm(CSocket& destination)   // функция отправки подтверждения 
 {
+	MessageHeader confirm;
+	confirm.type = MessageType::Confirm;
+	destination.Send(&confirm, sizeof(MessageHeader));
 }
 
-void Message::sendError(CSocket& destination)
+void Message::sendError(CSocket& destination)     // функция отправки сообщения об ошибке 
 {
+	MessageHeader error;
+	error.type = MessageType::Error;
+	destination.Send(&error, sizeof(MessageHeader));
 }
 
 MessageHeader Message::getHeader() const
@@ -84,6 +90,11 @@ MessageHeader Message::getHeader() const
 std::string Message::getSender() const
 {
 	return _header.sender_id;
+}
+
+std::string Message::getRecipient() const
+{
+	return _header.recipient_id;
 }
 
 bool Message::isRegistrationMessage() const

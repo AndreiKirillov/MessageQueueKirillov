@@ -1,6 +1,9 @@
 #include "pch.h"
 #include "Broker.h"
 
+#define CONFIRM true;
+#define ERROR false
+
 extern std::mutex console_mtx;
 
 Broker::Broker(): _clients(), _mtx_clients()
@@ -32,10 +35,31 @@ bool Broker::processMessage(const Message& message)
             addClient(new_client_id);
             std::lock_guard<std::mutex> console_lock(console_mtx);
             std::cout << "New client \"" << new_client_id << "\" connected to the server!" << std::endl;
-            return true;
+            return CONFIRM;
         }
         else
-            return false;  // клиент с таким именем существует, сообщаем об ошибке
+            return ERROR;  // клиент с таким именем существует, сообщаем об ошибке
+    }
+
+    case MessageType::Peer2Peer:      // сообщение от клиента клиенту
+    {
+        std::string sender_name = message.getSender();
+        std::string recipient_name = message.getRecipient();
+
+        std::lock_guard<std::mutex> clients_lock(_mtx_clients);
+        if (clientExists(sender_name) && clientExists(recipient_name))
+        {
+            if (sender_name != recipient_name)
+            {
+                auto recipient = _clients.find(recipient_name);
+                recipient->second->addMessage(message);
+                return CONFIRM;
+            }
+            else
+                return ERROR;
+        }
+        else
+            return ERROR;
     }
     }
 }

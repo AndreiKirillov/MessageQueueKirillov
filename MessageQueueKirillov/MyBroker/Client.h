@@ -10,7 +10,7 @@ class Client
 {
 private:
 	std::string _id;
-	threadsafe_queue<std::shared_ptr<Message>> _message_queue;
+	threadsafe_queue<Message> _message_queue;
 	std::condition_variable _event;
 	TimePoint _last_action_time;
 public:
@@ -18,7 +18,7 @@ public:
 	Client(const std::string& id);
 	Client(SOCKET hSock);
 
-	void addMessage(const std::shared_ptr<Message>& message);
+	void addMessage(const Message& message);
 
 	bool hasMessages();
 };

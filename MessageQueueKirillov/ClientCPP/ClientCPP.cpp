@@ -5,6 +5,8 @@
 #include "framework.h"
 #include "ClientCPP.h"
 
+#include "../MyBroker/Message.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -15,6 +17,20 @@
 CWinApp theApp;
 
 using namespace std;
+
+void registrateToServer()
+{
+    AfxSocketInit();
+    std::cout << "Введите имя для подключения к серверу" << std::endl;
+    std::string username;
+    std::cin >> username;
+
+    if(Message::sendRegistrationRequest(username))
+        std::cout << "Регистрация проведена успешно!" << std::endl;
+    else
+        std::cout << "Не удалось зарегистрироваться!" << std::endl;
+
+}
 
 int main()
 {
@@ -33,7 +49,11 @@ int main()
         }
         else
         {
+            setlocale(LC_ALL, "russian");
             // TODO: вставьте сюда код для приложения.
+            registrateToServer();
+            int a;
+            std::cin >> a;
         }
     }
     else

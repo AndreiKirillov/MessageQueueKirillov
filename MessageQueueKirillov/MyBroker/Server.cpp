@@ -14,16 +14,16 @@ Server::~Server()
 bool Server::StartUp()
 {
     AfxSocketInit();
-    if (CSocket::FromHandle(_server.m_hSocket) != NULL)
+   /* if (CSocket::FromHandle(_server.m_hSocket) != NULL)
         std::cout << "SOCKET ATACHED" << std::endl;
     else
-        std::cout << "SOCKET NOOOT ATACHED" << std::endl;
+        std::cout << "SOCKET NOOOT ATACHED" << std::endl;*/
     if (_server.Create(12345))
     {
-        if (CSocket::FromHandle(_server.m_hSocket) != NULL)
+        /*if (CSocket::FromHandle(_server.m_hSocket) != NULL)
             std::cout << "SOCKET ATACHED" << std::endl;
         else
-            std::cout << "SOCKET NOOOT ATACHED" << std::endl;
+            std::cout << "SOCKET NOOOT ATACHED" << std::endl;*/
         return true;
     }
     else
@@ -35,7 +35,6 @@ void Server::ProcessClient(SOCKET hSock)
     CSocket client_sock;
     client_sock.Attach(hSock);
 
-    // читаем первое сообщение, из него узнаем никнейм нового клиента
     Message message_from_client = Message::read(client_sock);
     if (_message_broker.processMessage(message_from_client))   // брокер обрабатывает сообщение
     {

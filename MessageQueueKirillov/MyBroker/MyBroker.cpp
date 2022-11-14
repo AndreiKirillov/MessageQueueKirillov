@@ -46,7 +46,7 @@ int main()
                 return 0;
             }
 
-            while (true)
+            while (true)       // обрабатываем входящие подключения
             {
                 main_server.WaitForConnection();
             }

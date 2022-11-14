@@ -17,7 +17,6 @@ void Broker::addClient(const std::string& id)  // добавление клиента в контейнер
 
 bool Broker::clientExists(const std::string& client_id)
 {
-	std::lock_guard<std::mutex> clients_lock(_mtx_clients);
 	return _clients.contains(client_id);
 }
 
@@ -30,15 +29,23 @@ bool Broker::processMessage(const Message& message)
     {
         std::string new_client_id = message.getSender();
 
+        std::unique_lock<std::mutex> clients_lock(_mtx_clients);
         if (!clientExists(new_client_id))  // если нет пользователя с таким именем
         {
             addClient(new_client_id);
+            clients_lock.unlock();
+
             std::lock_guard<std::mutex> console_lock(console_mtx);
             std::cout << "New client \"" << new_client_id << "\" connected to the server!" << std::endl;
             return CONFIRM;
         }
         else
             return ERROR;  // клиент с таким именем существует, сообщаем об ошибке
+    }
+
+    case MessageType::GetData:
+    {
+
     }
 
     case MessageType::Peer2Peer:      // сообщение от клиента клиенту
@@ -57,6 +64,24 @@ bool Broker::processMessage(const Message& message)
             }
             else
                 return ERROR;
+        }
+        else
+            return ERROR;
+    }
+
+    case MessageType::Exit:
+    {
+        std::string client = message.getSender();
+
+        std::unique_lock<std::mutex> clients_lock(_mtx_clients);
+        if (clientExists(client))
+        {
+            _clients.erase(client);
+            clients_lock.unlock();
+
+            std::lock_guard<std::mutex> console_lock(console_mtx);
+            std::cout << "Client " << client << " disconnected from the server!" << std::endl;
+            return CONFIRM;
         }
         else
             return ERROR;

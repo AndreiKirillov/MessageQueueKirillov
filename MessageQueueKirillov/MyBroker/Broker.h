@@ -15,6 +15,6 @@ public:
 	void addClient(const std::string& id);
 	bool clientExists(const std::string& client_id);
 
-	bool processMessage(const Message& message);
+	void processMessage(const Message& message, CSocket& client_sock);
 };
 

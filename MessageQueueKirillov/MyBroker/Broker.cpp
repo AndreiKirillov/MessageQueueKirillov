@@ -20,7 +20,7 @@ bool Broker::clientExists(const std::string& client_id)
 	return _clients.contains(client_id);
 }
 
-bool Broker::processMessage(const Message& message)
+void Broker::processMessage(const Message& message, CSocket& client_sock)
 {
     MessageHeader header = message.getHeader();
     switch (header.type)
@@ -37,15 +37,28 @@ bool Broker::processMessage(const Message& message)
 
             std::lock_guard<std::mutex> console_lock(console_mtx);
             std::cout << "New client \"" << new_client_id << "\" connected to the server!" << std::endl;
-            return CONFIRM;
+            Message::sendConfirm(client_sock);
         }
         else
-            return ERROR;  // клиент с таким именем существует, сообщаем об ошибке
+            Message::sendError(client_sock);  // клиент с таким именем существует, сообщаем об ошибке
+        break;
     }
 
     case MessageType::GetData:
     {
-
+        std::string sender_name = message.getSender();
+        auto client = _clients.find(message.getSender());
+        if (client != _clients.end())
+        {
+            if (client->second->hasMessages())
+            {
+                Message m = client->second->getMessage();
+                Message::send(client_sock, m);
+            }
+            else
+                Message::sendEmpty(client_sock);
+        }
+        break;
     }
 
     case MessageType::Peer2Peer:      // сообщение от клиента клиенту
@@ -60,13 +73,14 @@ bool Broker::processMessage(const Message& message)
             {
                 auto recipient = _clients.find(recipient_name);
                 recipient->second->addMessage(message);
-                return CONFIRM;
+                Message::sendConfirm(client_sock);
             }
             else
-                return ERROR;
+                Message::sendError(client_sock);
         }
         else
-            return ERROR;
+            Message::sendError(client_sock);
+        break;
     }
 
     case MessageType::Exit:
@@ -81,10 +95,11 @@ bool Broker::processMessage(const Message& message)
 
             std::lock_guard<std::mutex> console_lock(console_mtx);
             std::cout << "Client " << client << " disconnected from the server!" << std::endl;
-            return CONFIRM;
+            Message::sendConfirm(client_sock);
         }
         else
-            return ERROR;
+            Message::sendError(client_sock);
+        break;
     }
     }
 }

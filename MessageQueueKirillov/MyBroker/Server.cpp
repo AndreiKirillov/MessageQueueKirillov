@@ -36,14 +36,7 @@ void Server::ProcessClient(SOCKET hSock)
     client_sock.Attach(hSock);
 
     Message message_from_client = Message::read(client_sock);
-    if (_message_broker.processMessage(message_from_client))   // брокер обрабатывает сообщение
-    {
-        Message::sendConfirm(client_sock); // если сообщение успешно обработано, посылаем подтверждение
-    }
-    else
-    {
-        Message::sendError(client_sock); // отправляем сообщение об ошибке
-    }
+    _message_broker.processMessage(message_from_client, client_sock);  // брокер обрабатывает сообщение
 }
 
 void Server::WaitForConnection()

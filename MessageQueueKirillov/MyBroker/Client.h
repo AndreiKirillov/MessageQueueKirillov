@@ -20,6 +20,8 @@ public:
 
 	void addMessage(const Message& message);
 
+	Message getMessage();
+
 	bool hasMessages();
 };
 

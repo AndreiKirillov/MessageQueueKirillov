@@ -111,7 +111,23 @@ void Message::sendError(CSocket& destination)     // функция отправки сообщения 
 	error.type = MessageType::Error;
 	error.sender = MessageClient::Broker;
 	error.recipient = MessageClient::User;
+	error.sender_id_size = 0;
+	error.recipient_id_size = 0;
+	error.size = 0;
 	destination.Send(&error, sizeof(MessageHeader));
+}
+
+void Message::sendEmpty(CSocket& destination)
+{
+	MessageHeader header;
+	header.type = MessageType::Empty;
+	header.sender = MessageClient::Broker;
+	header.recipient = MessageClient::User;
+	header.sender_id_size = 0;
+	header.recipient_id_size = 0;
+	header.size = 0;
+	Message empty_msg(header);
+	send(destination, empty_msg);
 }
 
 //bool Message::waitConfirm(CSocket& confirm_source)
@@ -134,20 +150,20 @@ void Message::sendError(CSocket& destination)     // функция отправки сообщения 
 //	return _header.type == MessageType::Error;
 //}
 
-MessageHeader Message::getHeader() const
-{
-	return _header;
-}
+//MessageHeader Message::getHeader() const
+//{
+//	return _header;
+//}
 
-std::string Message::getSender() const
-{
-	return _sender_id;
-}
+//std::string Message::getSender() const
+//{
+//	return _sender_id;
+//}
 
-std::string Message::getRecipient() const
-{
-	return _recipient_id;
-}
+//std::string Message::getRecipient() const
+//{
+//	return _recipient_id;
+//}
 
 bool Message::isRegistrationMessage() const
 {

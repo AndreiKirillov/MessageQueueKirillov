@@ -16,7 +16,16 @@ void Client::addMessage(const Message& message)
 	_message_queue.push(message);
 }
 
+Message Client::getMessage()
+{
+	auto msg_ptr = _message_queue.try_pop();
+	if (msg_ptr != nullptr)
+		return *msg_ptr;
+	
+	return Message();
+}
+
 bool Client::hasMessages()
 {
-	return _message_queue.empty();
+	return !_message_queue.empty();
 }

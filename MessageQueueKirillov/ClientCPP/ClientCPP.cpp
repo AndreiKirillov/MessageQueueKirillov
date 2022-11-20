@@ -21,6 +21,20 @@ CWinApp theApp;
 using namespace std;
 
 std::mutex console_mtx;
+std::string username;
+bool is_connected_to_server = false;
+
+void printMenu()
+{
+    std::cout << "Что сделать дальше?" << std::endl;
+    std::cout << "1 - Написать сообщение" << std::endl;
+    std::cout << "2 - Отключиться от сервера" << std::endl;
+}
+
+enum class Action
+{
+    SendDirectMessage = 1, ExitServer = 2
+};
 
 bool registrateToServer(const std::string& username)
 {
@@ -28,6 +42,7 @@ bool registrateToServer(const std::string& username)
 
     if (Message::sendRegistrationRequest(username))
     {
+        is_connected_to_server = true;
         std::cout << "Регистрация проведена успешно!" << std::endl;
         return true;
     }
@@ -42,22 +57,102 @@ void checkIncomingMessages(const std::string& username)
 {
     while (true)
     {
-        Message check_message = Message::sendDataRequest(username);
-        switch (check_message.getHeader().type)
+        if (is_connected_to_server)
         {
-        case MessageType::Empty:
-        {
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
-            break;
+            Message check_message = Message::sendDataRequest(username);
+            switch (check_message.getHeader().type)
+            {
+            case MessageType::Empty:
+            {
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                break;
+            }
+            default:
+            {
+                //std::lock_guard<std::mutex> console_lock(console_mtx);
+                std::cout << "Message from " << check_message.getSender() << ": \"" << check_message.getData() << "\"" << std::endl;
+                break;
+            }
+            }
         }
-        default:
+        else 
+            return;
+    }
+}
+
+void sendDirectMessage()
+{
+    //std::unique_lock<std::mutex> console_lock(console_mtx);
+    std::cout << "Кому написать?" << std::endl;
+    //console_lock.unlock();
+    std::string recipient;
+    std::cin >> recipient;
+
+    //console_lock.lock();
+    std::cout << "Введите текст сообщения" << std::endl;
+    //console_lock.unlock();
+    std::string data;
+    std::cin >> data;//.clear();
+    //getline(std::cin, data);
+
+    MessageHeader header;
+    header.type = MessageType::Peer2Peer;
+    header.size = data.size();
+    Message message(header);
+    message.setSender(username);
+    message.setRecipient(recipient);
+    message.setData(data);
+
+    CSocket server_sock;
+    server_sock.Create();
+    if (server_sock.Connect("127.0.0.1", 12345))
+    {
+        Message::send(server_sock, message);
+
+        if (Message::waitConfirm(server_sock))
         {
-            //std::lock_guard<std::mutex> console_lock(console_mtx);
-            std::cout << "Message from " << check_message.getSender() << ": \"" << check_message.getData() << "\"" << std::endl;
-            break;
+            //console_lock.lock();
+            std::cout << "Отправлено!" << std::endl;
         }
+        else
+        {
+            //console_lock.lock();
+            std::cout << "Сервер сообщил об ошибке в отправленном сообщении" << std::endl;
         }
     }
+}
+
+bool exitServer()
+{
+    MessageHeader header;
+    header.type = MessageType::Exit;
+    header.size = 0;
+    header.recipient = MessageClient::Broker;
+    Message message(header);
+    message.setSender(username);
+
+    CSocket server_sock;
+    server_sock.Create();
+    if (server_sock.Connect("127.0.0.1", 12345))
+    {
+        Message::send(server_sock, message);
+
+        if (Message::waitConfirm(server_sock))
+        {
+            //console_lock.lock();
+            is_connected_to_server = false;
+            std::cout << "Вы отключились от сервера!" << std::endl;
+            return true;
+        }
+        else
+        {
+            //console_lock.lock();
+            std::cout << "Сервер сообщил об ошибке!" << std::endl;
+            return false;
+        }
+    }
+    else
+        return false;
 }
 
 int main()
@@ -80,7 +175,6 @@ int main()
             setlocale(LC_ALL, "russian");
             // TODO: вставьте сюда код для приложения.
             std::cout << "Введите имя для подключения к серверу" << std::endl;
-            std::string username;
             std::cin >> username;
             if (registrateToServer(username))
             {
@@ -89,42 +183,27 @@ int main()
 
                 while (true)
                 {
-                    //std::unique_lock<std::mutex> console_lock(console_mtx);
-                    std::cout << "Кому написать?" << std::endl;
-                    //console_lock.unlock();
-                    std::string recipient;
-                    std::cin >> recipient;
-
-                    //console_lock.lock();
-                    std::cout << "Введите текст сообщения" << std::endl;
-                    //console_lock.unlock();
-                    std::string data;
-                    std::cin >> data;
-
-                    MessageHeader header;
-                    header.type = MessageType::Peer2Peer;
-                    header.size = data.size();
-                    Message message(header);
-                    message.setSender(username);
-                    message.setRecipient(recipient);
-                    message.setData(data);
-
-                    CSocket server_sock;
-                    server_sock.Create();
-                    if (server_sock.Connect("127.0.0.1", 12345))
+                    printMenu();
+                    int user_action;
+                    std::cin >> user_action;
+                    switch (user_action)
                     {
-                        Message::send(server_sock, message);
-
-                        if (Message::waitConfirm(server_sock))
+                    case (int)Action::SendDirectMessage:
+                    {
+                        sendDirectMessage();
+                        break;
+                    }
+                    case (int)Action::ExitServer:
+                    {
+                        if (exitServer())
                         {
-                            //console_lock.lock();
-                            std::cout << "Отправлено!" << std::endl;
+                            int a;
+                            std::cin >> a;
+                            return 0;
                         }
                         else
-                        {
-                            //console_lock.lock();
-                            std::cout << "Сервер сообщил об ошибке в отправленном сообщении" << std::endl;
-                        }
+                            break;
+                    }
                     }
                 }
             }
@@ -132,6 +211,7 @@ int main()
             {
                 int a;
                 std::cin >> a;
+                return 0;
             }
         }
     }

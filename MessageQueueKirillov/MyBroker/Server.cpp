@@ -14,16 +14,8 @@ Server::~Server()
 bool Server::StartUp()
 {
     AfxSocketInit();
-   /* if (CSocket::FromHandle(_server.m_hSocket) != NULL)
-        std::cout << "SOCKET ATACHED" << std::endl;
-    else
-        std::cout << "SOCKET NOOOT ATACHED" << std::endl;*/
     if (_server.Create(12345))
     {
-        /*if (CSocket::FromHandle(_server.m_hSocket) != NULL)
-            std::cout << "SOCKET ATACHED" << std::endl;
-        else
-            std::cout << "SOCKET NOOOT ATACHED" << std::endl;*/
         return true;
     }
     else

@@ -16,5 +16,7 @@ public:
 	bool clientExists(const std::string& client_id);
 
 	void processMessage(const Message& message, CSocket& client_sock);
+
+	void checkInactiveClients(std::chrono::seconds timeout_limit);
 };
 

@@ -1,13 +1,12 @@
 #include "pch.h"
 #include "Broker.h"
 
-#define CONFIRM true;
-#define ERROR false
-
 extern std::mutex console_mtx;
 
 Broker::Broker(): _clients(), _mtx_clients()
 {
+    //std::thread thread_for_finding_inactive_clients(&Broker::checkInactiveClients, this, std::chrono::seconds(10));
+    //thread_for_finding_inactive_clients.detach();
 }
 
 void Broker::addClient(const std::string& id)  // добавление клиента в контейнер активных клиентов
@@ -50,6 +49,7 @@ void Broker::processMessage(const Message& message, CSocket& client_sock)
         auto client = _clients.find(message.getSender());
         if (client != _clients.end())
         {
+            client->second->refreshActivity();
             if (client->second->hasMessages())
             {
                 Message m = client->second->getMessage();
@@ -67,9 +67,11 @@ void Broker::processMessage(const Message& message, CSocket& client_sock)
         std::string recipient_name = message.getRecipient();
 
         std::lock_guard<std::mutex> clients_lock(_mtx_clients);
-        if (clientExists(sender_name) && clientExists(recipient_name))
+        if (clientExists(sender_name))
         {
-            if (sender_name != recipient_name)
+            auto sender = _clients.find(sender_name);
+            sender->second->refreshActivity();
+            if (clientExists(recipient_name) && sender_name != recipient_name)
             {
                 auto recipient = _clients.find(recipient_name);
                 recipient->second->addMessage(message);
@@ -101,5 +103,23 @@ void Broker::processMessage(const Message& message, CSocket& client_sock)
             Message::sendError(client_sock);
         break;
     }
+    }
+}
+
+void Broker::checkInactiveClients(std::chrono::seconds timeout_limit)
+{
+    while (true)
+    {
+        if (_clients.size() > 0)
+        {
+            for (auto& client : _clients)
+            {
+                auto time_difference = std::chrono::steady_clock::now() - client.second->getLastActionTime();
+                if (time_difference > timeout_limit)
+                {
+                    _clients.erase(client.first);
+                }
+            }
+        }
     }
 }

@@ -100,7 +100,6 @@ void Message::sendConfirm(CSocket& destination)   // функция отправки подтвержде
 	confirm.sender = MessageClient::Broker;
 	confirm.recipient = MessageClient::User;
 	confirm.sender_id_size = 0;
-	confirm.recipient_id_size = 0;
 	confirm.size = 0;
 	destination.Send(&confirm, sizeof(MessageHeader));
 }

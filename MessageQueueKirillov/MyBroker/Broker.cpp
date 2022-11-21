@@ -5,8 +5,8 @@ extern std::mutex console_mtx;
 
 Broker::Broker(): _clients(), _mtx_clients()
 {
-    //std::thread thread_for_finding_inactive_clients(&Broker::checkInactiveClients, this, std::chrono::seconds(10));
-    //thread_for_finding_inactive_clients.detach();
+    std::thread thread_for_finding_inactive_clients(&Broker::checkInactiveClients, this, std::chrono::seconds(2));
+    thread_for_finding_inactive_clients.detach();
 }
 
 void Broker::addClient(const std::string& id)  // добавление клиента в контейнер активных клиентов
@@ -110,6 +110,7 @@ void Broker::checkInactiveClients(std::chrono::seconds timeout_limit)
 {
     while (true)
     {
+        std::unique_lock<std::mutex> clients_lock(_mtx_clients);
         if (_clients.size() > 0)
         {
             for (auto& client : _clients)
@@ -121,5 +122,7 @@ void Broker::checkInactiveClients(std::chrono::seconds timeout_limit)
                 }
             }
         }
+        clients_lock.unlock();
+        std::this_thread::sleep_for(timeout_limit);
     }
 }

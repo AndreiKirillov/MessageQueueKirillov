@@ -2,7 +2,7 @@
 #include "framework.h"
 
 enum class MessageType
-{ Registration, Exit, Peer2Peer, GetData, Data, Empty, Confirm, Error};
+{ Registration, Exit, Peer2Peer, Broadcast, GetData, Empty, Confirm, Error};
 
 enum class MessageClient
 { Broker, User, All};
@@ -201,6 +201,7 @@ public:
 	void setData(const std::string& data)
 	{
 		_data = data;
+		_header.size = data.size();
 	}
 
 	std::string getData() const

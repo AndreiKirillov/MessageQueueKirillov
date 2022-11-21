@@ -26,14 +26,15 @@ bool is_connected_to_server = false;
 
 void printMenu()
 {
-    std::cout << "Что сделать дальше?" << std::endl;
-    std::cout << "1 - Написать сообщение" << std::endl;
-    std::cout << "2 - Отключиться от сервера" << std::endl;
+    std::cout << "Что сделать дальше?" << std::endl
+              << "1 - Написать сообщение юзеру" << std::endl
+              << "2 - Написать широковещательное сообщение" << std::endl
+              << "3 - Отключиться от сервера" << std::endl;
 }
 
 enum class Action
 {
-    SendDirectMessage = 1, ExitServer = 2
+    SendDirectMessage = 1, BroadcastMessage = 2, ExitServer = 3
 };
 
 bool registrateToServer(const std::string& username)
@@ -92,10 +93,40 @@ void sendDirectMessage()
 
     MessageHeader header;
     header.type = MessageType::Peer2Peer;
-    header.size = data.size();
     Message message(header);
     message.setSender(username);
     message.setRecipient(recipient);
+    message.setData(data);
+
+    CSocket server_sock;
+    server_sock.Create();
+    if (server_sock.Connect("127.0.0.1", 12345))
+    {
+        Message::send(server_sock, message);
+
+        if (Message::waitConfirm(server_sock))
+        {
+            std::cout << "Отправлено!" << std::endl;
+        }
+        else
+        {
+            std::cout << "Сервер сообщил об ошибке в отправленном сообщении" << std::endl;
+        }
+    }
+}
+
+void sendBroadcastMessage()
+{
+    std::cout << "Введите текст сообщения" << std::endl;
+    std::string data;
+    std::cin.ignore(32767, '\n');
+    getline(std::cin, data);
+
+    MessageHeader header;
+    header.type = MessageType::Broadcast;
+    header.recipient = MessageClient::All;
+    Message message(header);
+    message.setSender(username);
     message.setData(data);
 
     CSocket server_sock;
@@ -182,6 +213,11 @@ int main()
                     case (int)Action::SendDirectMessage:
                     {
                         sendDirectMessage();
+                        break;
+                    }
+                    case (int)Action::BroadcastMessage:
+                    {
+                        sendBroadcastMessage();
                         break;
                     }
                     case (int)Action::ExitServer:

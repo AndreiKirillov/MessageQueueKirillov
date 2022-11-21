@@ -85,6 +85,29 @@ void Broker::processMessage(const Message& message, CSocket& client_sock)
         break;
     }
 
+    case MessageType::Broadcast:
+    {
+        std::string sender_name = message.getSender();
+
+        std::lock_guard<std::mutex> clients_lock(_mtx_clients);
+        if (clientExists(sender_name))
+        {
+            auto sender = _clients.find(sender_name);
+            sender->second->refreshActivity();
+            for (auto& client : _clients)
+            {
+                if (sender_name != client.first)
+                {
+                    client.second->addMessage(message);
+                }
+            }
+            Message::sendConfirm(client_sock);
+        }
+        else
+            Message::sendError(client_sock);
+        break;
+    }
+
     case MessageType::Exit:
     {
         std::string client = message.getSender();

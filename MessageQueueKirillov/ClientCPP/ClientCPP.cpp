@@ -69,7 +69,6 @@ void checkIncomingMessages(const std::string& username)
             }
             default:
             {
-                //std::lock_guard<std::mutex> console_lock(console_mtx);
                 std::cout << "Message from " << check_message.getSender() << ": \"" << check_message.getData() << "\"" << std::endl;
                 break;
             }
@@ -82,18 +81,14 @@ void checkIncomingMessages(const std::string& username)
 
 void sendDirectMessage()
 {
-    //std::unique_lock<std::mutex> console_lock(console_mtx);
     std::cout << "Кому написать?" << std::endl;
-    //console_lock.unlock();
     std::string recipient;
     std::cin >> recipient;
 
-    //console_lock.lock();
     std::cout << "Введите текст сообщения" << std::endl;
-    //console_lock.unlock();
     std::string data;
-    std::cin >> data;//.clear();
-    //getline(std::cin, data);
+    std::cin.ignore(32767, '\n');
+    getline(std::cin, data);
 
     MessageHeader header;
     header.type = MessageType::Peer2Peer;
@@ -111,12 +106,10 @@ void sendDirectMessage()
 
         if (Message::waitConfirm(server_sock))
         {
-            //console_lock.lock();
             std::cout << "Отправлено!" << std::endl;
         }
         else
         {
-            //console_lock.lock();
             std::cout << "Сервер сообщил об ошибке в отправленном сообщении" << std::endl;
         }
     }
@@ -139,14 +132,12 @@ bool exitServer()
 
         if (Message::waitConfirm(server_sock))
         {
-            //console_lock.lock();
             is_connected_to_server = false;
             std::cout << "Вы отключились от сервера!" << std::endl;
             return true;
         }
         else
         {
-            //console_lock.lock();
             std::cout << "Сервер сообщил об ошибке!" << std::endl;
             return false;
         }

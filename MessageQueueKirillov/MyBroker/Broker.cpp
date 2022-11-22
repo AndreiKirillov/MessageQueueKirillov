@@ -136,13 +136,17 @@ void Broker::checkInactiveClients(std::chrono::seconds timeout_limit)
         std::unique_lock<std::mutex> clients_lock(_mtx_clients);
         if (_clients.size() > 0)
         {
-            for (auto& client : _clients)
+            for (auto client_iter = _clients.begin(); client_iter != _clients.end(); )
             {
-                auto time_difference = std::chrono::steady_clock::now() - client.second->getLastActionTime();
+                auto time_difference = std::chrono::steady_clock::now() - client_iter->second->getLastActionTime();
                 if (time_difference > timeout_limit)
                 {
-                    _clients.erase(client.first);
+                    std::lock_guard<std::mutex> console_lock(console_mtx);
+                    std::cout << "Client " << client_iter->first << " disconnected by the timeout!" << std::endl;
+                    _clients.erase(client_iter++);
                 }
+                else
+                    ++client_iter;
             }
         }
         clients_lock.unlock();

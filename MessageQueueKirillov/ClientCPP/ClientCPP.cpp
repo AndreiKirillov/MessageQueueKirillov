@@ -21,7 +21,6 @@ CWinApp theApp;
 using namespace std;
 
 std::mutex console_mtx;
-std::string username;
 bool is_connected_to_server = false;
 
 void printMenu()
@@ -37,11 +36,11 @@ enum class Action
     SendDirectMessage = 1, BroadcastMessage = 2, ExitServer = 3
 };
 
-bool registrateToServer(const std::string& username)
+bool registrateToServer(const std::string& _username)
 {
     AfxSocketInit();
 
-    if (Message::sendRegistrationRequest(username))
+    if (Message::sendRegistrationRequest(_username))
     {
         is_connected_to_server = true;
         std::cout << "Регистрация проведена успешно!" << std::endl;
@@ -54,13 +53,13 @@ bool registrateToServer(const std::string& username)
     }
 }
 
-void checkIncomingMessages(const std::string& username)
+void checkIncomingMessages(const std::string& _username)
 {
     while (true)
     {
         if (is_connected_to_server)
         {
-            Message check_message = Message::sendDataRequest(username);
+            Message check_message = Message::sendDataRequest(_username);
             switch (check_message.getHeader().type)
             {
             case MessageType::Empty:
@@ -80,7 +79,7 @@ void checkIncomingMessages(const std::string& username)
     }
 }
 
-void sendDirectMessage()
+void sendDirectMessage(const std::string& from_username)
 {
     std::cout << "Кому написать?" << std::endl;
     std::string recipient;
@@ -94,7 +93,7 @@ void sendDirectMessage()
     MessageHeader header;
     header.type = MessageType::Peer2Peer;
     Message message(header);
-    message.setSender(username);
+    message.setSender(from_username);
     message.setRecipient(recipient);
     message.setData(data);
 
@@ -115,7 +114,7 @@ void sendDirectMessage()
     }
 }
 
-void sendBroadcastMessage()
+void sendBroadcastMessage(const std::string& from_username)
 {
     std::cout << "Введите текст сообщения" << std::endl;
     std::string data;
@@ -126,7 +125,7 @@ void sendBroadcastMessage()
     header.type = MessageType::Broadcast;
     header.recipient = MessageClient::All;
     Message message(header);
-    message.setSender(username);
+    message.setSender(from_username);
     message.setData(data);
 
     CSocket server_sock;
@@ -146,14 +145,14 @@ void sendBroadcastMessage()
     }
 }
 
-bool exitServer()
+bool exitServer(const std::string& _username)
 {
     MessageHeader header;
     header.type = MessageType::Exit;
     header.size = 0;
     header.recipient = MessageClient::Broker;
     Message message(header);
-    message.setSender(username);
+    message.setSender(_username);
 
     CSocket server_sock;
     server_sock.Create();
@@ -197,6 +196,7 @@ int main()
             setlocale(LC_ALL, "russian");
             // TODO: вставьте сюда код для приложения.
             std::cout << "Введите имя для подключения к серверу" << std::endl;
+            std::string username;
             std::cin >> username;
             if (registrateToServer(username))
             {
@@ -212,17 +212,17 @@ int main()
                     {
                     case (int)Action::SendDirectMessage:
                     {
-                        sendDirectMessage();
+                        sendDirectMessage(username);
                         break;
                     }
                     case (int)Action::BroadcastMessage:
                     {
-                        sendBroadcastMessage();
+                        sendBroadcastMessage(username);
                         break;
                     }
                     case (int)Action::ExitServer:
                     {
-                        if (exitServer())
+                        if (exitServer(username))
                         {
                             int a;
                             std::cin >> a;

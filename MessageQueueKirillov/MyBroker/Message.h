@@ -33,7 +33,7 @@ public:
 	{}
 	Message(const MessageHeader& header, const std::string& data = "") : _header(header), _recipient_id(""), _sender_id(""), _data(data)
 	{}
-	//Message(MessageHeader&& header, std::string&& data);
+	
 
 	static Message read(CSocket& source)
 	{

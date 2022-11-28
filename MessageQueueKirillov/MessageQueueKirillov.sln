@@ -7,7 +7,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MyBroker", "MyBroker\MyBrok
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ClientCPP", "ClientCPP\ClientCPP.vcxproj", "{1DA07605-3DC1-478A-AA0B-52EA2F6089D6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpClient", "SharpClient\SharpClient.csproj", "{980EED92-99BA-4745-8927-5C71C8176556}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpClient", "SharpClient\SharpClient.csproj", "{980EED92-99BA-4745-8927-5C71C8176556}"
+EndProject
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "PythonClient", "PythonClient\PythonClient.pyproj", "{48E60701-0E79-44C5-A262-40830B727335}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,6 +53,12 @@ Global
 		{980EED92-99BA-4745-8927-5C71C8176556}.Release|x64.Build.0 = Release|Any CPU
 		{980EED92-99BA-4745-8927-5C71C8176556}.Release|x86.ActiveCfg = Release|Any CPU
 		{980EED92-99BA-4745-8927-5C71C8176556}.Release|x86.Build.0 = Release|Any CPU
+		{48E60701-0E79-44C5-A262-40830B727335}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{48E60701-0E79-44C5-A262-40830B727335}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{48E60701-0E79-44C5-A262-40830B727335}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{48E60701-0E79-44C5-A262-40830B727335}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{48E60701-0E79-44C5-A262-40830B727335}.Release|x64.ActiveCfg = Release|Any CPU
+		{48E60701-0E79-44C5-A262-40830B727335}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -212,6 +212,25 @@ namespace SharpClient
             _header.type = type;
         }
 
+        public MessageHeader GetHeader()
+        {
+            return _header;
+        }
+        public string GetData()
+        {
+            return _data;
+        }
+
+        public string GetSender()
+        {
+            return _sender_id;
+        }
+
+        public string GetRecipient()
+        {
+            return _recipient_id;
+        }
+
         public bool IsConfirm()
         {
             return _header.type == MessageType.Confirm;

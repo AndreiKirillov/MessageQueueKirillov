@@ -37,7 +37,7 @@ namespace SharpClient
 				return false;
 		}
 
-		public static Message sendDataRequest(string username)   // Функция отправки запроса данных
+		public static Message SendDataRequest(string username)   // Функция отправки запроса данных
 		{
 			MessageHeader header = new MessageHeader();
 
@@ -71,7 +71,7 @@ namespace SharpClient
 			}
 		}
 
-		public static bool sendDirectMessage(string sender, string recipient, string data)
+		public static bool SendDirectMessage(string sender, string recipient, string data)
 		{
 			MessageHeader header = new MessageHeader();
 			header.type = MessageType.Peer2Peer;
@@ -84,19 +84,15 @@ namespace SharpClient
 			IPEndPoint endPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), nPort);
 			Socket server_sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 			server_sock.Connect(endPoint);
-			if (!server_sock.Connected)
-			{
-				Message.Send(server_sock, message);
-				if (Message.WaitConfirm(server_sock))
-					return true;
-				else
-					return false;
-			}
+
+			Message.Send(server_sock, message);
+			if (Message.WaitConfirm(server_sock))
+				return true;
 			else
 				return false;
 		}
 
-		public static bool sendBroadcastMessage(string sender, string data)
+		public static bool SendBroadcastMessage(string sender, string data)
 		{
 			MessageHeader header = new MessageHeader();
 			header.type = MessageType.Broadcast;
@@ -109,14 +105,37 @@ namespace SharpClient
 			IPEndPoint endPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), nPort);
 			Socket server_sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 			server_sock.Connect(endPoint);
+
+			Message.Send(server_sock, message);
+			if (Message.WaitConfirm(server_sock))
+				return true;
+			else
+				return false;
+		}
+
+		public static bool SendExitRequest(string username)
+		{
+			MessageHeader header = new MessageHeader();
+
+			header.recipient = MessageClient.Broker;
+			header.recipient_id_size = 0;
+
+			header.type = MessageType.Exit;
+			header.size = 0;
+			Message request = new Message(ref header);
+			request.SetSender(username);
+
+			int nPort = 12345;
+			IPEndPoint endPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), nPort);
+			Socket server_sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+			server_sock.Connect(endPoint);
 			if (!server_sock.Connected)
 			{
-				Message.Send(server_sock, message);
-				if (Message.WaitConfirm(server_sock))
-					return true;
-				else
-					return false;
+				throw new Exception("Connection error");
 			}
+
+			if (Message.Send(server_sock, request)) // Отправляем запрос регистрации
+				return Message.WaitConfirm(server_sock); // получаем подтверждение регистрации или сообщение об ошибке
 			else
 				return false;
 		}

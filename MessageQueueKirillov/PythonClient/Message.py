@@ -42,7 +42,7 @@ class Message:
 
 	#_header : MessageHeader
 
-	def __init__(self, header, data=""):
+	def __init__(self, header = MessageHeader(), data=""):
 		self._header = header
 		self._recipient_id = ""
 		self._sender_id = ""
@@ -84,14 +84,14 @@ class Message:
 	@staticmethod
 	def WaitConfirm(s):
 		m = Message()
-		m.Receive()
+		m.Receive(s)
 		if m._header.type == CONFIRM:
 			return True
 		if m._header.type == ERROR:
 			return False
 
 
-	def SendRegistrationRequest(username):
+	def SendRegistrationRequest(self,username):
 		HOST = 'localhost'
 		PORT = 12345
 		with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -107,10 +107,10 @@ class Message:
 			message._sender_id = username
 			
 			message.Send(s)
-			res = WaitConfirm(s)
+			res = Message.WaitConfirm(s)
 			return res
 
-	def SendDataRequest(username):
+	def SendDataRequest(self, username):
 		HOST = 'localhost'
 		PORT = 12345
 		with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -120,10 +120,10 @@ class Message:
 			header.recipient_id_size = 0
 			header.sender_type = USER
 			header.sender_id_size = len(username)
-			message._sender_id = username
 			header.type = GET_DATA
 			header.size = 0
 			message = Message(header)
+			message._sender_id = username
 			
 			message.Send(s)
 			res = Message()
@@ -132,7 +132,7 @@ class Message:
 
 
 
-	def SendDirectMessage(sender, recipient, data):
+	def SendDirectMessage(self, sender, recipient, data):
 		HOST = 'localhost'
 		PORT = 12345
 		with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -141,19 +141,19 @@ class Message:
 			header.recipient_type = USER
 			header.recipient_id_size = len(recipient)
 			header.sender_type = USER
-			header.sender_id_size = len(username)
-			message._sender_id = username
-			message._recipient_id = recipient
+			header.sender_id_size = len(sender)
 			header.type = PEER2PEER
 			header.size = len(data)
 			message = Message(header)
+			message._sender_id = sender
+			message._recipient_id = recipient
 			message._data = data
 			
 			message.Send(s)
-			res = WaitConfirm(s)
+			res = Message.WaitConfirm(s)
 			return res
 
-	def SendBroadcastMessage(sender, recipient, data):
+	def SendBroadcastMessage(self, sender, data):
 		HOST = 'localhost'
 		PORT = 12345
 		with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -162,13 +162,32 @@ class Message:
 			header.recipient_type = ALL
 			header.recipient_id_size = 0
 			header.sender_type = USER
-			header.sender_id_size = len(username)
-			message._sender_id = username
+			header.sender_id_size = len(sender)
 			header.type = BROADCAST
 			header.size = len(data)
 			message = Message(header)
+			message._sender_id = sender
 			message._data = data
 			
 			message.Send(s)
-			res = WaitConfirm(s)
+			res = Message.WaitConfirm(s)
+			return res
+
+	def SendExitRequest(self, sender):
+		HOST = 'localhost'
+		PORT = 12345
+		with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+			s.connect((HOST, PORT))
+			header = MessageHeader()
+			header.recipient_type = BROKER
+			header.recipient_id_size = 0
+			header.sender_type = USER
+			header.sender_id_size = len(sender)
+			header.type = EXIT
+			header.size = 0
+			message = Message(header)
+			message._sender_id = sender
+			
+			message.Send(s)
+			res = Message.WaitConfirm(s)
 			return res

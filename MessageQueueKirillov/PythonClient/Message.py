@@ -81,14 +81,94 @@ class Message:
 		if self._header.size > 0:
 			self._data = struct.unpack(f'{self._header.size}s', s.recv(self._header.size))[0].decode('cp866')
 
-	def SendMessage(To, Type = MT_DATA, Data=""):
+	@staticmethod
+	def WaitConfirm(s):
+		m = Message()
+		m.Receive()
+		if m._header.type == CONFIRM:
+			return True
+		if m._header.type == ERROR:
+			return False
+
+
+	def SendRegistrationRequest(username):
 		HOST = 'localhost'
 		PORT = 12345
 		with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
 			s.connect((HOST, PORT))
-			m = Message(To, Message.ClientID, Type, Data)
-			m.Send(s)
-			m.Receive(s)
-			if m.Header.Type == MT_INIT:
-				Message.ClientID = m.Header.To
-			return m
+			header = MessageHeader()
+			header.recipient_type = BROKER
+			header.recipient_id_size = 0
+			header.sender_type = USER
+			header.sender_id_size = len(username)
+			header.type = REGISTRATION
+			header.size = 0
+			message = Message(header)
+			message._sender_id = username
+			
+			message.Send(s)
+			res = WaitConfirm(s)
+			return res
+
+	def SendDataRequest(username):
+		HOST = 'localhost'
+		PORT = 12345
+		with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+			s.connect((HOST, PORT))
+			header = MessageHeader()
+			header.recipient_type = BROKER
+			header.recipient_id_size = 0
+			header.sender_type = USER
+			header.sender_id_size = len(username)
+			message._sender_id = username
+			header.type = GET_DATA
+			header.size = 0
+			message = Message(header)
+			
+			message.Send(s)
+			res = Message()
+			res.Receive(s)
+			return res
+
+
+
+	def SendDirectMessage(sender, recipient, data):
+		HOST = 'localhost'
+		PORT = 12345
+		with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+			s.connect((HOST, PORT))
+			header = MessageHeader()
+			header.recipient_type = USER
+			header.recipient_id_size = len(recipient)
+			header.sender_type = USER
+			header.sender_id_size = len(username)
+			message._sender_id = username
+			message._recipient_id = recipient
+			header.type = PEER2PEER
+			header.size = len(data)
+			message = Message(header)
+			message._data = data
+			
+			message.Send(s)
+			res = WaitConfirm(s)
+			return res
+
+	def SendBroadcastMessage(sender, recipient, data):
+		HOST = 'localhost'
+		PORT = 12345
+		with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+			s.connect((HOST, PORT))
+			header = MessageHeader()
+			header.recipient_type = ALL
+			header.recipient_id_size = 0
+			header.sender_type = USER
+			header.sender_id_size = len(username)
+			message._sender_id = username
+			header.type = BROADCAST
+			header.size = len(data)
+			message = Message(header)
+			message._data = data
+			
+			message.Send(s)
+			res = WaitConfirm(s)
+			return res

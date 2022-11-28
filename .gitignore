@@ -49,3 +49,8 @@ MessageQueueKirillov/.vs/MessageQueueKirillov/v16/.suo
 *.pdb
 *.txt
 MessageQueueKirillov/.vs/MessageQueueKirillov/v16/.suo
+*.json
+*.cache
+*.targets
+*.editorconfig
+*.props

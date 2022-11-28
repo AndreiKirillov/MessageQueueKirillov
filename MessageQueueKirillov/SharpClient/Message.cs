@@ -50,7 +50,7 @@ namespace SharpClient
             _data = string.Empty;
         }
 
-        public Message(ref MessageHeader header, string data)
+        public Message(ref MessageHeader header, string data = "")
         {
             _header = header;
             _recipient_id = string.Empty;
@@ -95,7 +95,7 @@ namespace SharpClient
             return data;
         }
 
-        public static Boolean Send(Socket destination, Message message)    // Функция отправки сообщения через сокет
+        public static bool Send(Socket destination, Message message)    // Функция отправки сообщения через сокет
         {
             try
             {
@@ -136,51 +136,89 @@ namespace SharpClient
             MessageHeader header = new MessageHeader();
             byte[] buff_for_header = new byte[Marshal.SizeOf(header)];
 
-            source.Receive(buff_for_header, Marshal.SizeOf(header), SocketFlags.None);
-            header = fromBytes<MessageHeader>(buff_for_header);
-
-            if (header.type == MessageType.Confirm || header.type == MessageType.Error || header.type == MessageType.Empty)
+            try
             {
+                source.Receive(buff_for_header, Marshal.SizeOf(header), SocketFlags.None);
+                header = fromBytes<MessageHeader>(buff_for_header);
+
+                if (header.type == MessageType.Confirm || header.type == MessageType.Error || header.type == MessageType.Empty)
+                {
+                    received_message._header = header;
+                    return received_message;
+                }
+
+                if (header.recipient == MessageClient.User)
+                {
+                    byte[] recipient_buff = new byte[header.recipient_id_size];
+                    source.Receive(recipient_buff, header.recipient_id_size, SocketFlags.None);
+                    received_message._recipient_id = received_message.get866().GetString(recipient_buff, 0, header.recipient_id_size);
+                }
+
+                if (header.sender == MessageClient.User)
+                {
+                    byte[] sender_buff = new byte[header.sender_id_size];
+                    source.Receive(sender_buff, header.sender_id_size, SocketFlags.None);
+                    received_message._sender_id = received_message.get866().GetString(sender_buff, 0, header.sender_id_size);
+                }
+
                 received_message._header = header;
+                if (header.size > 0)
+                {
+                    byte[] data_buff = new byte[header.size];
+                    source.Receive(data_buff, header.size, SocketFlags.None);
+                    received_message._data = received_message.get866().GetString(data_buff, 0, header.size);
+                }
                 return received_message;
             }
-
-            if (header.recipient == MessageClient.User)
+            catch(SocketException ex)
             {
-                byte[] recipient_buff = new byte[header.recipient_id_size];
-                source.Receive(recipient_buff, header.recipient_id_size, SocketFlags.None);
-                received_message._recipient_id = received_message.get866().GetString(recipient_buff, 0, header.recipient_id_size);
+                Console.WriteLine("{0} Error code: {1}.", ex.Message, ex.ErrorCode);
+                return received_message;
             }
-
-            if (header.sender == MessageClient.User)
-            {
-                byte[] sender_buff = new byte[header.sender_id_size];
-                source.Receive(sender_buff, header.sender_id_size, SocketFlags.None);
-                received_message._sender_id = received_message.get866().GetString(sender_buff, 0, header.sender_id_size);
-            }
-
-            received_message._header = header;
-            if (header.size > 0)
-            {
-                byte[] data_buff = new byte[header.size];
-                source.Receive(data_buff, header.size, SocketFlags.None);
-                received_message._data = received_message.get866().GetString(data_buff, 0, header.size);
-            }
-            return received_message;
         }
 
-        public void setSender(string username)
+        public static bool WaitConfirm(Socket confirm_source)
+        {
+            Message confirm_message = Read(confirm_source);
+
+            if (confirm_message.IsConfirm())
+                return true;
+            else
+                return false;
+        }
+
+        public void SetSender(string username)
 	    {
 		    _sender_id = username;
 		    _header.sender = MessageClient.User;
 		    _header.sender_id_size = username.Length;
 	    }
 
-        public void setRecipient(string username)
+        public void SetRecipient(string username)
         {
             _recipient_id = username;
             _header.recipient = MessageClient.User;
             _header.recipient_id_size = username.Length;
+        }
+
+        public void SetData(string data)
+	    {
+		    _data = data;
+		    _header.size = data.Length;
+	    }
+
+        public void SetType(MessageType type)
+        {
+            _header.type = type;
+        }
+
+        public bool IsConfirm()
+        {
+            return _header.type == MessageType.Confirm;
+        }
+        public bool IsError()
+        {
+            return _header.type == MessageType.Error;
         }
     }
 }

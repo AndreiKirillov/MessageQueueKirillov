@@ -7,10 +7,18 @@
 
 
 <form method="GET" action="/cgi-bin/login.py">
-    input your login
-<br><input type=text name=user_login>
+    input message recipient
+<br><input type=text name=recipient>
 <br>
-<br><input type=submit value="Log in server">
+<br><input type=radio name=message_type value="USER">Message to user</input>
+<br><input type=radio name=message_type value="ALL">Broadcast message</input>
+<br><input type=radio name=message_type value="EXIT">Exit server</input>
+<br>
+<br>
+input text of message 
+<br><input type=text name=data>
+<br>
+<br><input type=submit value="Send message">
 
 </form>
 

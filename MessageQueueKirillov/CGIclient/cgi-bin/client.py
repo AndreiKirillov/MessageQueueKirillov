@@ -1,25 +1,43 @@
 #!/usr/bin/env python3
-import cgi
-import html
+import cgi, html, http, os, sys
+from Message import *
+from cgi_scripts import *
+
+currentdir = os.path.dirname(os.path.abspath(__file__))
+parentdir = os.path.dirname(currentdir)
+sys.path.append(parentdir)
+import main as global_vars
+
+# Получаем имя пользователя из куки
+cookie = http.cookies.SimpleCookie(os.environ.get("HTTP_COOKIE"))
+username = cookie.get("username")
 
 form = cgi.FieldStorage()
-text1 = form.getfirst("TEXT_1", "не задано")
-text2 = form.getfirst("TEXT_2", "не задано")
-text1 = html.escape(text1)
-text2 = html.escape(text2)
+recipient = form.getfirst("recipient")
+recipient = html.escape(recipient)
+message_type = form.getfirst("message_type")
+message_type = html.escape(message_type)
+data = form.getfirst("data")
+data = html.escape(data)
 
-print("Content-type: text/html; charset=utf-8\n\n")
-print("""<!DOCTYPE HTML>
-        <html>
-        <head>
-            <meta charset="utf-8">
-            <title>Form manager</title>
-        </head>
-        <body>""")
+if message_type == "USER":
+    message = Message()
+    if message.SendDirectMessage(username, recipient, data):
+        messageWasSendSuccessfully()
+    else:
+        messageError()
 
-print("<h1>Form managing!</h1>")
-print("<p>TEXT_1: {}</p>".format(text1))
-print("<p>TEXT_2: {}</p>".format(text2))
+if message_type == "BROADCAST":
+    message = Message()
+    if message.SendBroadcastMessage(username, data):
+        messageWasSendSuccessfully()
+    else:
+        messageError()
 
-print("""</body>
-        </html>""")
+if message_type == "EXIT":
+    message = Message()
+    if message.SendExitRequest(username):
+        global_vars.is_connected_to_server = False
+        exitFromServer()
+    else:
+        messageError()

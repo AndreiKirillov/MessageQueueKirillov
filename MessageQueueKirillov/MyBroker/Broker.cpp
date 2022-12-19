@@ -5,7 +5,7 @@ extern std::mutex console_mtx;
 
 Broker::Broker(): _clients(), _mtx_clients(), _history_server_sock()
 {
-    std::thread thread_for_finding_inactive_clients(&Broker::checkInactiveClients, this, std::chrono::seconds(2));
+    std::thread thread_for_finding_inactive_clients(&Broker::checkInactiveClients, this, std::chrono::seconds(120));
     thread_for_finding_inactive_clients.detach();
 }
 

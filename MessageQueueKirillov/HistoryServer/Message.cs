@@ -10,7 +10,7 @@ using System.Net.Sockets;
 namespace HistoryServer
 {
     public enum MessageType
-    { Registration, Exit, Peer2Peer, Broadcast, GetData, Empty, Confirm, Error, HistoryServerInit};
+    { Registration, Exit, Peer2Peer, Broadcast, GetData, Empty, Confirm, Error, HistoryServerInit, History};
 
     public enum MessageClient
     { Broker, User, All };
@@ -201,6 +201,7 @@ namespace HistoryServer
 
             Message.Send(server_sock, request); // Отправляем запрос регистрации
             Message.WaitConfirm(server_sock);
+            Console.WriteLine("Successfully connected to the server");
             return server_sock;
         }
 

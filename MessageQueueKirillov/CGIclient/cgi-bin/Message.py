@@ -114,7 +114,7 @@ class Message:
 
 	def SendDataRequest(self, username):
 		HOST = 'localhost'
-		PORT = 12345
+		PORT = 12346
 		with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
 			s.connect((HOST, PORT))
 			header = MessageHeader()

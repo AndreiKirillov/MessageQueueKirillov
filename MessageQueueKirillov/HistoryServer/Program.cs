@@ -14,11 +14,11 @@ namespace HistoryServer
 
         static void ProcessClient(ref Socket client_sock)
         {
-            Message message = Message.Read(_history_server);
+            Message message = Message.Read(client_sock);
             MessageHeader header = message.GetHeader();
             if(header.type == MessageType.GetData)
             {
-                string query = $"SELECT sender,data FROM messages WHERE recipient='{message.GetSender()}'";
+                string query = $"SELECT sender,data FROM messages WHERE recipient='{message.GetSender()}' OR recipient='ALL'";
                 var command = _db_connection.CreateCommand();
                 command.CommandText = query;
                 var reader = command.ExecuteReader();

@@ -84,3 +84,21 @@ def exitFromServer():
                 <h1>You exited from server!</h1>
             </body>
             </html>""")
+
+def showAllMessages(messages_list):
+    print("Content-type: text/html; charset=utf-8\n\n")
+    print("""<!DOCTYPE HTML>
+            <html>
+            <head>
+                <meta charset="utf-8">
+                <title>Messages</title>
+            </head>
+            <body>""")
+    for message in messages_list:
+        print(f"<h3>{message}</h3")
+    print("""<br>
+            <form action="../main_page.html">
+                <button>Continue work</button>
+                </form>
+            </body>
+            </html>""")

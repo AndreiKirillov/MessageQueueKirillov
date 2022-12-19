@@ -11,6 +11,8 @@ GET_DATA	= 4
 EMPTY	    = 5
 CONFIRM     = 6
 ERROR       = 7
+HistoryServerInit = 8
+History = 9
 
 # enum MessageClient
 BROKER	= 0

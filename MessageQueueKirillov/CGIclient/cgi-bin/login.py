@@ -2,12 +2,14 @@
 import cgi
 import html, threading, sys, os
 from Message import *
-from cgi_scripts import *
+from cgi_scripts import * 
 
-currentdir = os.path.dirname(os.path.abspath(__file__))
+currentdir = os.path.dirname(os.path.realpath(__file__))
 parentdir = os.path.dirname(currentdir)
 sys.path.append(parentdir)
 import main as global_vars
+#from main import is_connected_to_server
+#from main import thread_for_incoming_msg
 
 
 def CheckIncomingMessages(username):

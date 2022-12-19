@@ -3,10 +3,12 @@ import cgi, html, http, os, sys
 from Message import *
 from cgi_scripts import *
 
-currentdir = os.path.dirname(os.path.abspath(__file__))
+currentdir = os.path.dirname(os.path.realpath(__file__))
 parentdir = os.path.dirname(currentdir)
 sys.path.append(parentdir)
 import main as global_vars
+#from main import is_connected_to_server
+#from main import thread_for_incoming_msg
 
 # Получаем имя пользователя из куки
 cookie = http.cookies.SimpleCookie(os.environ.get("HTTP_COOKIE"))

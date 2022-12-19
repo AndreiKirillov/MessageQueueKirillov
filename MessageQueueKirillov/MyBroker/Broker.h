@@ -9,6 +9,8 @@ class Broker
 private:
 	std::map<std::string, std::unique_ptr<Client>> _clients;     // набор активных клиентов сервера
 	std::mutex _mtx_clients;
+
+	CSocket _history_server_sock;
 public:
 	Broker();
 

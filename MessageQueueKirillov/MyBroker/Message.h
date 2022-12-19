@@ -2,7 +2,7 @@
 #include "framework.h"
 
 enum class MessageType
-{ Registration, Exit, Peer2Peer, Broadcast, GetData, Empty, Confirm, Error};
+{ Registration, Exit, Peer2Peer, Broadcast, GetData, Empty, Confirm, Error, HistoryServerInit};
 
 enum class MessageClient
 { Broker, User, All};
@@ -41,7 +41,8 @@ public:
 		MessageHeader header;
 		source.Receive(&header, sizeof(MessageHeader));
 
-		if (header.type == MessageType::Confirm || header.type == MessageType::Error || header.type == MessageType::Empty)
+		if (header.type == MessageType::Confirm || header.type == MessageType::Error || header.type == MessageType::Empty || 
+			header.type == MessageType::HistoryServerInit)
 		{
 			received_message._header = header;
 			return received_message;
@@ -71,7 +72,7 @@ public:
 
 		return received_message;
 	}
-	static bool send(CSocket& destination, Message& message)
+	static bool send(CSocket& destination, const Message& message)
 	{
 		// отправляем заголовок
 		if (destination.Send(&message._header, sizeof(MessageHeader)) == SOCKET_ERROR)

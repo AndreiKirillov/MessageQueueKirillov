@@ -54,3 +54,10 @@ MessageQueueKirillov/.vs/MessageQueueKirillov/v16/.suo
 *.targets
 *.editorconfig
 *.props
+*.CopyComplete
+*.pyc
+MessageQueueKirillov/.vs/MessageQueueKirillov/v16/.suo
+*.pyc
+*.csproj
+MessageQueueKirillov/HistoryServer/obj/Debug/net5.0/HistoryServer.AssemblyInfo.cs
+MessageQueueKirillov/HistoryServer/obj/Debug/net5.0/.NETCoreApp,Version=v5.0.AssemblyAttributes.cs

@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpClient", "SharpClient\
 EndProject
 Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "PythonClient", "PythonClient\PythonClient.pyproj", "{48E60701-0E79-44C5-A262-40830B727335}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HistoryServer", "HistoryServer\HistoryServer.csproj", "{1E93B2D5-BD61-4AA6-9224-1C03C2B4E28C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -59,6 +61,18 @@ Global
 		{48E60701-0E79-44C5-A262-40830B727335}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{48E60701-0E79-44C5-A262-40830B727335}.Release|x64.ActiveCfg = Release|Any CPU
 		{48E60701-0E79-44C5-A262-40830B727335}.Release|x86.ActiveCfg = Release|Any CPU
+		{1E93B2D5-BD61-4AA6-9224-1C03C2B4E28C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1E93B2D5-BD61-4AA6-9224-1C03C2B4E28C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1E93B2D5-BD61-4AA6-9224-1C03C2B4E28C}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{1E93B2D5-BD61-4AA6-9224-1C03C2B4E28C}.Debug|x64.Build.0 = Debug|Any CPU
+		{1E93B2D5-BD61-4AA6-9224-1C03C2B4E28C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{1E93B2D5-BD61-4AA6-9224-1C03C2B4E28C}.Debug|x86.Build.0 = Debug|Any CPU
+		{1E93B2D5-BD61-4AA6-9224-1C03C2B4E28C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1E93B2D5-BD61-4AA6-9224-1C03C2B4E28C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1E93B2D5-BD61-4AA6-9224-1C03C2B4E28C}.Release|x64.ActiveCfg = Release|Any CPU
+		{1E93B2D5-BD61-4AA6-9224-1C03C2B4E28C}.Release|x64.Build.0 = Release|Any CPU
+		{1E93B2D5-BD61-4AA6-9224-1C03C2B4E28C}.Release|x86.ActiveCfg = Release|Any CPU
+		{1E93B2D5-BD61-4AA6-9224-1C03C2B4E28C}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

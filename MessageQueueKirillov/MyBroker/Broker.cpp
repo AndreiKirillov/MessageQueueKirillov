@@ -3,7 +3,7 @@
 
 extern std::mutex console_mtx;
 
-Broker::Broker(): _clients(), _mtx_clients()
+Broker::Broker(): _clients(), _mtx_clients(), _history_server_sock()
 {
     std::thread thread_for_finding_inactive_clients(&Broker::checkInactiveClients, this, std::chrono::seconds(2));
     thread_for_finding_inactive_clients.detach();
@@ -75,6 +75,7 @@ void Broker::processMessage(const Message& message, CSocket& client_sock)
             {
                 auto recipient = _clients.find(recipient_name);
                 recipient->second->addMessage(message);
+                Message::send(_history_server_sock, message);  // Оправляем сообщение серверу истории
                 Message::sendConfirm(client_sock);
             }
             else
@@ -101,6 +102,7 @@ void Broker::processMessage(const Message& message, CSocket& client_sock)
                     client.second->addMessage(message);
                 }
             }
+            Message::send(_history_server_sock, message);    // Оправляем сообщение серверу истории
             Message::sendConfirm(client_sock);
         }
         else
@@ -124,6 +126,15 @@ void Broker::processMessage(const Message& message, CSocket& client_sock)
         }
         else
             Message::sendError(client_sock);
+        break;
+    }
+
+    case MessageType::HistoryServerInit:
+    {
+        SOCKET sock = client_sock.Detach();
+        _history_server_sock.Attach(sock);
+
+        Message::sendConfirm(_history_server_sock);
         break;
     }
     }

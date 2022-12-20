@@ -7,12 +7,14 @@ from cgi_scripts import *
 #import global_access
 
 form = cgi.FieldStorage()
-recipient = form.getfirst("recipient")
-recipient = html.escape(recipient)
 message_type = form.getfirst("message_type")
 message_type = html.escape(message_type)
-data = form.getfirst("data")
-data = html.escape(data)
+if message_type != "EXIT":
+    data = form.getfirst("data")
+    data = html.escape(data)
+if message_type == "USER":
+    recipient = form.getfirst("recipient")
+    recipient = html.escape(recipient)
 
 file = open("username.txt", "r")
 username = file.read()

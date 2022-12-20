@@ -96,6 +96,7 @@ def showAllMessages(messages_list):
             <body>""")
     for message in messages_list:
         print(f"<h3>{message}</h3")
+        print("<br>")
     print("""<br>
             <form action="../main_page.html">
                 <button>Continue work</button>

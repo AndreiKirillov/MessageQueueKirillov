@@ -18,7 +18,9 @@ namespace HistoryServer
             MessageHeader header = message.GetHeader();
             if(header.type == MessageType.GetData)
             {
-                string query = $"SELECT sender,data FROM messages WHERE recipient='{message.GetSender()}' OR recipient='ALL'";
+                string client_name = message.GetSender();
+                string query = $"SELECT sender,recipient,data FROM messages WHERE recipient='{client_name}' OR " +
+                    $"(recipient='ALL' AND sender <>'{client_name}') OR (sender = '{client_name}') ORDER BY id";
                 var command = _db_connection.CreateCommand();
                 command.CommandText = query;
                 var reader = command.ExecuteReader();
@@ -26,8 +28,17 @@ namespace HistoryServer
                 while (reader.Read())
                 {
                     string sender = reader[0].ToString();
-                    string data = reader[1].ToString();
-                    string row = $"Message from {sender}: {data}\n";
+                    string recipient = reader[1].ToString();
+                    string data = reader[2].ToString();
+                    string row = "";
+                    if (recipient == client_name || recipient == "ALL")
+                    {
+                        row = $"Message from {sender}: {data}\n";
+                    }
+                    if (sender == client_name)
+                    {
+                        row = $"Message to {recipient}: {data}\n";
+                    }
                     message_list += row;
                 }
                 reader.Close();

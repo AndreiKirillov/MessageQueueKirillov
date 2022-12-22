@@ -1,10 +1,15 @@
 ﻿using System;
 using System.Threading;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Collections.Generic;
 
 namespace SharpClient
 {
     class Program
     {
+        static HttpClient client = new HttpClient();
         static bool is_connected_to_server = false;
         enum Action
         {
@@ -110,6 +115,11 @@ namespace SharpClient
 
         static void Main(string[] args)
         {
+            client.BaseAddress = new Uri("http://localhost:5000/");
+            client.DefaultRequestHeaders.Accept.Clear();
+            client.DefaultRequestHeaders.Accept.Add(
+                new MediaTypeWithQualityHeaderValue("application/json"));
+
             Console.WriteLine("Введите имя для подключения к серверу");
             string username = Console.ReadLine();
 

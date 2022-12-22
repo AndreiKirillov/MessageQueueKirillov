@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using System.Runtime.InteropServices;
-using System.Net;
 using System.Net.Sockets;
+using System.Text;
+using System.Runtime.InteropServices;
 
-namespace SharpClient
+namespace RESTserver.Models
 {
     public enum MessageType
     { Registration, Exit, Peer2Peer, Broadcast, GetData, Empty, Confirm, Error };
@@ -16,7 +15,7 @@ namespace SharpClient
     { Broker, User, All };
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct MessageHeader
+    struct MessageHeader
     {
         [MarshalAs(UnmanagedType.I4)]
         public MessageClient recipient;
@@ -34,7 +33,7 @@ namespace SharpClient
         public int size;
     };
 
-    public class Message
+    internal class Message
     {
         private MessageHeader _header;
         private string _recipient_id;
@@ -122,7 +121,7 @@ namespace SharpClient
                     destination.Send(message.get866().GetBytes(message._data), message._data.Length, SocketFlags.None);
                 }
             }
-            catch(SocketException ex)
+            catch (SocketException ex)
             {
                 Console.WriteLine("{0} Error code: {1}.", ex.Message, ex.ErrorCode);
                 return false;
@@ -170,7 +169,7 @@ namespace SharpClient
                 }
                 return received_message;
             }
-            catch(SocketException ex)
+            catch (SocketException ex)
             {
                 Console.WriteLine("{0} Error code: {1}.", ex.Message, ex.ErrorCode);
                 return received_message;
@@ -188,11 +187,11 @@ namespace SharpClient
         }
 
         public void SetSender(string username)
-	    {
-		    _sender_id = username;
-		    _header.sender = MessageClient.User;
-		    _header.sender_id_size = username.Length;
-	    }
+        {
+            _sender_id = username;
+            _header.sender = MessageClient.User;
+            _header.sender_id_size = username.Length;
+        }
 
         public void SetRecipient(string username)
         {
@@ -202,10 +201,10 @@ namespace SharpClient
         }
 
         public void SetData(string data)
-	    {
-		    _data = data;
-		    _header.size = data.Length;
-	    }
+        {
+            _data = data;
+            _header.size = data.Length;
+        }
 
         public void SetType(MessageType type)
         {
